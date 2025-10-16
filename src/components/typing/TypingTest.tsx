@@ -254,7 +254,7 @@ export const TypingTest: React.FC<TypingTestProps> = ({
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
-      <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+      <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
         {/* Test Controls */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex gap-4">
@@ -320,7 +320,7 @@ export const TypingTest: React.FC<TypingTestProps> = ({
 
         {/* Text Display */}
         <div className="mb-6">
-          <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 min-h-[200px]">
+          <div className="bg-gray-50 dark:bg-black p-4 rounded-lg border-2 border-gray-200 dark:border-gray-800 min-h-[200px]">
             <div className="font-mono text-lg leading-relaxed whitespace-pre-wrap">
               {renderTextWithHighlighting()}
             </div>
@@ -336,14 +336,14 @@ export const TypingTest: React.FC<TypingTestProps> = ({
             onKeyDown={handleKeyDown}
             placeholder={state.isActive ? "Start typing..." : "Click 'Start Test' to begin"}
             disabled={!state.isActive}
-            className="w-full h-32 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-mono text-lg resize-none focus:outline-none focus:border-black dark:focus:border-white disabled:bg-gray-100 dark:disabled:bg-gray-800 bg-white dark:bg-gray-800 text-black dark:text-white"
+            className="w-full h-32 p-4 border-2 border-gray-300 dark:border-gray-700 rounded-lg font-mono text-lg resize-none focus:outline-none focus:border-black dark:focus:border-white disabled:bg-gray-100 dark:disabled:bg-gray-900 bg-white dark:bg-black text-black dark:text-white"
             style={{ fontFamily: 'JetBrains Mono, monospace' }}
           />
         </div>
 
         {/* Instructions */}
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          <p>• Press <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Esc</kbd> to stop the test</p>
+          <p>• Press <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded">Esc</kbd> to stop the test</p>
           <p>• Focus on accuracy first, then speed</p>
           <p>• The test will automatically end when time runs out or text is completed</p>
         </div>

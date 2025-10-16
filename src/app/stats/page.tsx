@@ -69,9 +69,9 @@ export default function StatsPage() {
   const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
 
   return (
-    <div className="min-h-screen bg-white text-black dark:bg-gray-900 dark:text-white">
+    <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/80">
+      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-800 dark:bg-black/80">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div>
@@ -93,17 +93,17 @@ export default function StatsPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-100 border-gray-200">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-black data-[state=active]:text-white">
+          <TabsList className="grid w-full grid-cols-4 bg-gray-100 border-gray-200 dark:bg-gray-900 dark:border-gray-800">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">
               Overview
             </TabsTrigger>
-            <TabsTrigger value="progress" className="data-[state=active]:bg-black data-[state=active]:text-white">
+            <TabsTrigger value="progress" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">
               Progress
             </TabsTrigger>
-            <TabsTrigger value="keywords" className="data-[state=active]:bg-black data-[state=active]:text-white">
+            <TabsTrigger value="keywords" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">
               Keywords
             </TabsTrigger>
-            <TabsTrigger value="sessions" className="data-[state=active]:bg-black data-[state=active]:text-white">
+            <TabsTrigger value="sessions" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">
               Sessions
             </TabsTrigger>
           </TabsList>
@@ -111,38 +111,38 @@ export default function StatsPage() {
           <TabsContent value="overview" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {/* Overall Stats Cards */}
-              <Card className="p-6 bg-white border-gray-200 shadow-sm">
-                <h3 className="text-lg font-semibold text-black mb-2">Total Sessions</h3>
-                <div className="text-3xl font-bold text-black">{sessions.length}</div>
-                <p className="text-sm text-gray-600">All time</p>
+              <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
+                <h3 className="text-lg font-semibold text-black dark:text-white mb-2">Total Sessions</h3>
+                <div className="text-3xl font-bold text-black dark:text-white">{sessions.length}</div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">All time</p>
               </Card>
 
-              <Card className="p-6 bg-white border-gray-200 shadow-sm">
-                <h3 className="text-lg font-semibold text-black mb-2">Average WPM</h3>
-                <div className="text-3xl font-bold text-black">
+              <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
+                <h3 className="text-lg font-semibold text-black dark:text-white mb-2">Average WPM</h3>
+                <div className="text-3xl font-bold text-black dark:text-white">
                   {sessions.length > 0 
                     ? Math.round(sessions.reduce((sum, s) => sum + s.wpm, 0) / sessions.length)
                     : 0
                   }
                 </div>
-                <p className="text-sm text-gray-600">Words per minute</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Words per minute</p>
               </Card>
 
-              <Card className="p-6 bg-white border-gray-200 shadow-sm">
-                <h3 className="text-lg font-semibold text-black mb-2">Average Accuracy</h3>
-                <div className="text-3xl font-bold text-black">
+              <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
+                <h3 className="text-lg font-semibold text-black dark:text-white mb-2">Average Accuracy</h3>
+                <div className="text-3xl font-bold text-black dark:text-white">
                   {sessions.length > 0 
                     ? Math.round(sessions.reduce((sum, s) => sum + s.accuracy, 0) / sessions.length)
                     : 0
                   }%
                 </div>
-                <p className="text-sm text-gray-600">Typing accuracy</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Typing accuracy</p>
               </Card>
 
-              <Card className="p-6 bg-white border-gray-200 shadow-sm">
-                <h3 className="text-lg font-semibold text-black mb-2">Keywords Tracked</h3>
-                <div className="text-3xl font-bold text-black">{keywordStats.length}</div>
-                <p className="text-sm text-gray-600">Unique keywords</p>
+              <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
+                <h3 className="text-lg font-semibold text-black dark:text-white mb-2">Keywords Tracked</h3>
+                <div className="text-3xl font-bold text-black dark:text-white">{keywordStats.length}</div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Unique keywords</p>
               </Card>
             </div>
 

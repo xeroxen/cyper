@@ -55,9 +55,9 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black dark:bg-gray-900 dark:text-white">
+    <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/80">
+      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-800 dark:bg-black/80">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div>
@@ -79,7 +79,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="practice" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-gray-100 border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+          <TabsList className="grid w-full grid-cols-3 bg-gray-100 border-gray-200 dark:bg-gray-900 dark:border-gray-800">
             <TabsTrigger value="practice" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">
               Practice
             </TabsTrigger>
@@ -95,7 +95,7 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Controls Sidebar */}
               <div className="lg:col-span-1">
-                <Card className="p-4 bg-white border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                <Card className="p-4 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
                   <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">Test Configuration</h3>
                   
                   <div className="space-y-4">
@@ -104,12 +104,12 @@ export default function Home() {
                         Programming Language
                       </label>
                       <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                        <SelectTrigger className="bg-white border-gray-300 text-black dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <SelectTrigger className="bg-white border-gray-300 text-black dark:bg-black dark:border-gray-700 dark:text-white">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                        <SelectContent className="bg-white border-gray-200 dark:bg-black dark:border-gray-800">
                           {languages.map(lang => (
-                            <SelectItem key={lang.id} value={lang.id} className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-700">
+                            <SelectItem key={lang.id} value={lang.id} className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">
                               {lang.name}
                             </SelectItem>
                           ))}
@@ -122,18 +122,18 @@ export default function Home() {
                         Test Duration
                       </label>
                       <Select value={testDuration.toString()} onValueChange={(value) => setTestDuration(parseInt(value))}>
-                        <SelectTrigger className="bg-white border-gray-300 text-black dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <SelectTrigger className="bg-white border-gray-300 text-black dark:bg-black dark:border-gray-700 dark:text-white">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                          <SelectItem value="30" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-700">30 seconds</SelectItem>
-                          <SelectItem value="60" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-700">1 minute</SelectItem>
-                          <SelectItem value="120" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-700">2 minutes</SelectItem>
+                        <SelectContent className="bg-white border-gray-200 dark:bg-black dark:border-gray-800">
+                          <SelectItem value="30" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">30 seconds</SelectItem>
+                          <SelectItem value="60" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">1 minute</SelectItem>
+                          <SelectItem value="120" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">2 minutes</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
                       <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quick Stats</h4>
                       <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                         <div>Language: {languages.find(l => l.id === selectedLanguage)?.name}</div>

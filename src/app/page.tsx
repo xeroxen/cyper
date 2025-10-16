@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { languages } from '@/lib/languages';
 import { loadUserSettings, saveUserSettings } from '@/lib/storage/localStorage';
 import { UserSettings } from '@/types';
@@ -21,7 +22,7 @@ export default function Home() {
     soundEnabled: true,
     fontSize: 'medium',
     testDuration: 60,
-    theme: 'dark'
+    theme: 'light'
   });
 
   useEffect(() => {
@@ -54,31 +55,22 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+    <div className="min-h-screen bg-white text-black dark:bg-gray-900 dark:text-white">
       {/* Header */}
-      <header className="border-b border-gray-700 bg-gray-800/50 backdrop-blur-sm">
+      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/80">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-blue-400">Cyper</h1>
-              <p className="text-gray-400">Programmer Typing Practice</p>
+              <h1 className="text-2xl font-bold text-black dark:text-white">Cyper</h1>
+              <p className="text-gray-600 dark:text-gray-400">Programmer Typing Practice</p>
             </div>
             <div className="flex gap-4">
               <Link href="/stats">
-                <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-700">
+                <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
                   View Stats
                 </Button>
               </Link>
-              <Button 
-                variant="outline" 
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
-                onClick={() => {
-                  const newTheme = settings.theme === 'dark' ? 'light' : 'dark';
-                  handleSettingsChange({ theme: newTheme });
-                }}
-              >
-                {settings.theme === 'dark' ? '☀️' : '🌙'} Theme
-              </Button>
+              <ThemeToggle />
             </div>
           </div>
         </div>
@@ -87,14 +79,14 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="practice" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-gray-800 border-gray-700">
-            <TabsTrigger value="practice" className="data-[state=active]:bg-blue-600">
+          <TabsList className="grid w-full grid-cols-3 bg-gray-100 border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+            <TabsTrigger value="practice" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">
               Practice
             </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="settings" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">
               Settings
             </TabsTrigger>
-            <TabsTrigger value="about" className="data-[state=active]:bg-blue-600">
+            <TabsTrigger value="about" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">
               About
             </TabsTrigger>
           </TabsList>
@@ -103,21 +95,21 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               {/* Controls Sidebar */}
               <div className="lg:col-span-1">
-                <Card className="p-4 bg-gray-800 border-gray-700">
-                  <h3 className="text-lg font-semibold mb-4 text-blue-400">Test Configuration</h3>
+                <Card className="p-4 bg-white border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                  <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">Test Configuration</h3>
                   
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Programming Language
                       </label>
                       <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                        <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                        <SelectTrigger className="bg-white border-gray-300 text-black dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-gray-800 border-gray-600">
+                        <SelectContent className="bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                           {languages.map(lang => (
-                            <SelectItem key={lang.id} value={lang.id} className="text-white hover:bg-gray-700">
+                            <SelectItem key={lang.id} value={lang.id} className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-700">
                               {lang.name}
                             </SelectItem>
                           ))}
@@ -126,24 +118,24 @@ export default function Home() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Test Duration
                       </label>
                       <Select value={testDuration.toString()} onValueChange={(value) => setTestDuration(parseInt(value))}>
-                        <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                        <SelectTrigger className="bg-white border-gray-300 text-black dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-gray-800 border-gray-600">
-                          <SelectItem value="30" className="text-white hover:bg-gray-700">30 seconds</SelectItem>
-                          <SelectItem value="60" className="text-white hover:bg-gray-700">1 minute</SelectItem>
-                          <SelectItem value="120" className="text-white hover:bg-gray-700">2 minutes</SelectItem>
+                        <SelectContent className="bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                          <SelectItem value="30" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-700">30 seconds</SelectItem>
+                          <SelectItem value="60" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-700">1 minute</SelectItem>
+                          <SelectItem value="120" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-700">2 minutes</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-700">
-                      <h4 className="text-sm font-medium text-gray-300 mb-2">Quick Stats</h4>
-                      <div className="space-y-2 text-sm text-gray-400">
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quick Stats</h4>
+                      <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                         <div>Language: {languages.find(l => l.id === selectedLanguage)?.name}</div>
                         <div>Duration: {testDuration}s</div>
                         <div>Mode: Adaptive Practice</div>
@@ -156,13 +148,13 @@ export default function Home() {
               {/* Main Test Area */}
               <div className="lg:col-span-3">
                 {testResults && (
-                  <Card className="p-4 mb-6 bg-green-900/20 border-green-500">
-                    <h3 className="text-lg font-semibold text-green-400 mb-2">Test Completed!</h3>
+                  <Card className="p-4 mb-6 bg-green-50 border-green-200">
+                    <h3 className="text-lg font-semibold text-green-800 mb-2">Test Completed!</h3>
                     <div className="flex gap-4">
-                      <Badge variant="secondary" className="bg-green-600 text-white">
+                      <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
                         WPM: {testResults.wpm}
                       </Badge>
-                      <Badge variant="secondary" className="bg-green-600 text-white">
+                      <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
                         Accuracy: {testResults.accuracy}%
                       </Badge>
                     </div>
@@ -181,12 +173,12 @@ export default function Home() {
           </TabsContent>
 
           <TabsContent value="settings" className="mt-6">
-            <Card className="p-6 bg-gray-800 border-gray-700">
-              <h3 className="text-xl font-semibold mb-4 text-blue-400">Settings</h3>
+            <Card className="p-6 bg-white border-gray-200 shadow-sm">
+              <h3 className="text-xl font-semibold mb-4 text-black">Settings</h3>
               
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Font Size
                   </label>
                   <Select 
@@ -195,19 +187,19 @@ export default function Home() {
                       handleSettingsChange({ fontSize: value })
                     }
                   >
-                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectTrigger className="bg-white border-gray-300 text-black">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
-                      <SelectItem value="small" className="text-white hover:bg-gray-700">Small</SelectItem>
-                      <SelectItem value="medium" className="text-white hover:bg-gray-700">Medium</SelectItem>
-                      <SelectItem value="large" className="text-white hover:bg-gray-700">Large</SelectItem>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="small" className="text-black hover:bg-gray-50">Small</SelectItem>
+                      <SelectItem value="medium" className="text-black hover:bg-gray-50">Medium</SelectItem>
+                      <SelectItem value="large" className="text-black hover:bg-gray-50">Large</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Default Test Duration
                   </label>
                   <Select 
@@ -216,13 +208,13 @@ export default function Home() {
                       handleSettingsChange({ testDuration: parseInt(value) as 30 | 60 | 120 })
                     }
                   >
-                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectTrigger className="bg-white border-gray-300 text-black">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-600">
-                      <SelectItem value="30" className="text-white hover:bg-gray-700">30 seconds</SelectItem>
-                      <SelectItem value="60" className="text-white hover:bg-gray-700">1 minute</SelectItem>
-                      <SelectItem value="120" className="text-white hover:bg-gray-700">2 minutes</SelectItem>
+                    <SelectContent className="bg-white border-gray-200">
+                      <SelectItem value="30" className="text-black hover:bg-gray-50">30 seconds</SelectItem>
+                      <SelectItem value="60" className="text-black hover:bg-gray-50">1 minute</SelectItem>
+                      <SelectItem value="120" className="text-black hover:bg-gray-50">2 minutes</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -233,9 +225,9 @@ export default function Home() {
                     id="soundEnabled"
                     checked={settings.soundEnabled}
                     onChange={(e) => handleSettingsChange({ soundEnabled: e.target.checked })}
-                    className="rounded border-gray-600 bg-gray-700 text-blue-600"
+                    className="rounded border-gray-300 bg-white text-black"
                   />
-                  <label htmlFor="soundEnabled" className="text-sm font-medium text-gray-300">
+                  <label htmlFor="soundEnabled" className="text-sm font-medium text-gray-700">
                     Enable sound effects
                   </label>
                 </div>
@@ -244,17 +236,17 @@ export default function Home() {
           </TabsContent>
 
           <TabsContent value="about" className="mt-6">
-            <Card className="p-6 bg-gray-800 border-gray-700">
-              <h3 className="text-xl font-semibold mb-4 text-blue-400">About Cyper</h3>
+            <Card className="p-6 bg-white border-gray-200 shadow-sm">
+              <h3 className="text-xl font-semibold mb-4 text-black">About Cyper</h3>
               
-              <div className="space-y-4 text-gray-300">
+              <div className="space-y-4 text-gray-700">
                 <p>
                   Cyper is a specialized typing practice application designed specifically for programmers. 
                   Unlike general typing practice apps, Cyper focuses on programming languages, syntax, 
                   and common coding patterns.
                 </p>
                 
-                <h4 className="text-lg font-semibold text-blue-400">Key Features:</h4>
+                <h4 className="text-lg font-semibold text-black">Key Features:</h4>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Adaptive learning algorithm that focuses on your weak keywords</li>
                   <li>Spaced repetition system for long-term retention</li>
@@ -264,7 +256,7 @@ export default function Home() {
                   <li>Realistic code snippet generation</li>
                 </ul>
 
-                <h4 className="text-lg font-semibold text-blue-400">How it works:</h4>
+                <h4 className="text-lg font-semibold text-black">How it works:</h4>
                 <p>
                   The app tracks your performance on individual keywords and programming concepts. 
                   It uses a hybrid algorithm combining frequency-based practice (showing weak keywords more often) 

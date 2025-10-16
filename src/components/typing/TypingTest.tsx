@@ -254,21 +254,22 @@ export const TypingTest: React.FC<TypingTestProps> = ({
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
-      <Card className="p-6">
+      <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-gray-800 dark:border-gray-700">
         {/* Test Controls */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex gap-4">
             <Button
               onClick={startTest}
               disabled={state.isActive}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
             >
               {state.isActive ? 'Test Running...' : 'Start Test'}
             </Button>
             <Button
               onClick={stopTest}
               disabled={!state.isActive}
-              variant="destructive"
+              variant="outline"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               Stop Test
             </Button>
@@ -276,16 +277,17 @@ export const TypingTest: React.FC<TypingTestProps> = ({
               onClick={resetTest}
               disabled={state.isActive}
               variant="outline"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               Reset
             </Button>
           </div>
           
           <div className="text-right">
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-black dark:text-white">
               {timeRemaining}s
             </div>
-            <div className="text-sm text-gray-500">Time Remaining</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">Time Remaining</div>
           </div>
         </div>
 
@@ -334,7 +336,7 @@ export const TypingTest: React.FC<TypingTestProps> = ({
             onKeyDown={handleKeyDown}
             placeholder={state.isActive ? "Start typing..." : "Click 'Start Test' to begin"}
             disabled={!state.isActive}
-            className="w-full h-32 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-mono text-lg resize-none focus:outline-none focus:border-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+            className="w-full h-32 p-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg font-mono text-lg resize-none focus:outline-none focus:border-black dark:focus:border-white disabled:bg-gray-100 dark:disabled:bg-gray-800 bg-white dark:bg-gray-800 text-black dark:text-white"
             style={{ fontFamily: 'JetBrains Mono, monospace' }}
           />
         </div>

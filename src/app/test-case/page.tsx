@@ -57,7 +57,7 @@ export default function TestCasePage() {
       const textarea = inputRef.current;
       textarea.style.fontSize = '18px';
       textarea.style.lineHeight = '1.6';
-      textarea.style.padding = '16px';
+      textarea.style.padding = '24px';
       textarea.style.fontFamily = 'JetBrains Mono, monospace';
     }
   }, [state.currentText]);
@@ -286,7 +286,21 @@ export default function TestCasePage() {
       }
       
       return (
-        <span key={index} className={className}>
+        <span 
+          key={index} 
+          className={className}
+          style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '18px',
+            lineHeight: '1.6',
+            display: 'inline',
+            margin: '0',
+            padding: '0',
+            letterSpacing: '0px',
+            textIndent: '0px',
+            textAlign: 'left'
+          }}
+        >
           {char}
         </span>
       );
@@ -441,8 +455,29 @@ export default function TestCasePage() {
         <div className="flex-1 relative">
           {/* Text Display with Overlay */}
           <div className="absolute inset-0 bg-gray-50 dark:bg-gray-900">
-            <div className="h-full p-6">
-              <div className="font-mono text-lg leading-relaxed whitespace-pre-wrap h-full overflow-y-auto">
+            <div 
+              className="h-full overflow-y-auto"
+              style={{ 
+                padding: '24px',
+                margin: '0',
+                boxSizing: 'border-box'
+              }}
+            >
+              <div 
+                className="font-mono whitespace-pre-wrap"
+                style={{ 
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontSize: '18px',
+                  lineHeight: '1.6',
+                  padding: '0px',
+                  margin: '0',
+                  letterSpacing: '0px',
+                  textIndent: '0px',
+                  textAlign: 'left',
+                  wordWrap: 'normal',
+                  whiteSpace: 'pre-wrap'
+                }}
+              >
                 {renderTextWithHighlighting()}
               </div>
             </div>
@@ -457,14 +492,25 @@ export default function TestCasePage() {
               onKeyDown={handleKeyDown}
               placeholder={state.isActive ? "Start typing..." : "Click 'Start' to begin"}
               disabled={!state.isActive}
-              className="w-full h-full p-6 border-0 font-mono text-lg leading-relaxed resize-none focus:outline-none bg-transparent text-transparent caret-yellow-500 whitespace-pre-wrap"
+              className="w-full h-full border-0 resize-none focus:outline-none bg-transparent caret-yellow-500 whitespace-pre-wrap text-gray-600 dark:text-gray-400"
               style={{ 
                 fontFamily: 'JetBrains Mono, monospace',
-                color: 'transparent',
                 background: 'transparent',
                 caretColor: '#eab308',
                 fontSize: '18px',
-                lineHeight: '1.6'
+                lineHeight: '1.6',
+                padding: '24px',
+                margin: '0',
+                boxSizing: 'border-box',
+                letterSpacing: '0px',
+                textIndent: '0px',
+                textAlign: 'left',
+                border: 'none',
+                outline: 'none',
+                resize: 'none',
+                overflow: 'hidden',
+                wordWrap: 'normal',
+                whiteSpace: 'pre-wrap'
               }}
             />
           </div>

@@ -1,413 +1,536 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { TypingTest } from '@/components/typing/TypingTest';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { languages } from '@/lib/languages';
-import { loadUserSettings, saveUserSettings } from '@/lib/storage/localStorage';
-import { UserSettings } from '@/types';
+import { generateTest } from '@/lib/algorithms/testGenerator';
+import { trackKeywordUsage, analyzeTypingPerformance, saveSessionResults } from '@/lib/algorithms/performanceAnalyzer';
+import { loadKeywordStats, saveKeywordStats, loadSessionHistory, saveSessionHistory } from '@/lib/storage/localStorage';
+import { KeywordStats, SessionResult, Performance } from '@/types';
 import Link from 'next/link';
-import { ArrowLeft, Play, X, Target, Clock, Code, Brain } from 'lucide-react';
+import { ArrowLeft, Play, Square, RotateCcw, Target, Clock, Zap } from 'lucide-react';
 
-export default function PracticePage() {
-  const [currentView, setCurrentView] = useState<'setup' | 'practice' | 'modal'>('setup');
+interface TypingState {
+  isActive: boolean;
+  currentText: string;
+  userInput: string;
+  currentIndex: number;
+  startTime: Date | null;
+  errors: number;
+  wpm: number;
+  accuracy: number;
+}
+
+export default function TestCasePage() {
   const [selectedLanguage, setSelectedLanguage] = useState('javascript');
   const [testDuration, setTestDuration] = useState(60);
-  const [isTestActive, setIsTestActive] = useState(false);
-  const [testResults, setTestResults] = useState<any>(null);
-  const [showStartModal, setShowStartModal] = useState(false);
-  const [settings, setSettings] = useState<UserSettings>({
-    soundEnabled: true,
-    fontSize: 'medium',
-    testDuration: 60,
-    theme: 'light'
+  const [state, setState] = useState<TypingState>({
+    isActive: false,
+    currentText: '',
+    userInput: '',
+    currentIndex: 0,
+    startTime: null,
+    errors: 0,
+    wpm: 0,
+    accuracy: 0
   });
+  const [performances, setPerformances] = useState<Performance[]>([]);
+  const [timeRemaining, setTimeRemaining] = useState(testDuration);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [testResults, setTestResults] = useState<any>(null);
+  
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Generate test text when component mounts or language changes
   useEffect(() => {
-    const savedSettings = loadUserSettings();
-    setSettings(savedSettings);
-    setTestDuration(savedSettings.testDuration);
-  }, []);
+    generateTestText();
+  }, [selectedLanguage]);
 
-  const handleTestStart = () => {
-    setIsTestActive(true);
-    setTestResults(null);
-    setShowStartModal(false);
-    setCurrentView('practice');
-  };
+  // Sync textarea with display text
+  useEffect(() => {
+    if (inputRef.current && state.currentText) {
+      // Ensure textarea has the same styling as the display text
+      const textarea = inputRef.current;
+      textarea.style.fontSize = '18px';
+      textarea.style.lineHeight = '1.6';
+      textarea.style.padding = '24px';
+      textarea.style.fontFamily = 'JetBrains Mono, monospace';
+    }
+  }, [state.currentText]);
 
-  const handleTestStop = () => {
-    setIsTestActive(false);
-  };
+  // Timer countdown
+  useEffect(() => {
+    if (state.isActive && timeRemaining > 0) {
+      intervalRef.current = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 1) {
+            handleTestComplete();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    }
 
-  const handleTestComplete = (results: any) => {
-    setIsTestActive(false);
-    setTestResults(results);
-  };
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [state.isActive, timeRemaining]);
 
-  const handleSettingsChange = (newSettings: Partial<UserSettings>) => {
-    const updatedSettings = { ...settings, ...newSettings };
-    setSettings(updatedSettings);
-    saveUserSettings(updatedSettings);
+  const generateTestText = useCallback(() => {
+    try {
+      const testOptions = {
+        language: selectedLanguage,
+        duration: testDuration,
+        difficulty: 'medium' as const,
+        mode: {
+          type: 'custom' as const,
+          language: selectedLanguage,
+          duration: testDuration
+        }
+      };
+      
+      const testText = generateTest(testOptions);
+      setState(prev => ({
+        ...prev,
+        currentText: testText,
+        userInput: '',
+        currentIndex: 0,
+        errors: 0,
+        wpm: 0,
+        accuracy: 0
+      }));
+      setPerformances([]);
+      setIsCompleted(false);
+      setTestResults(null);
+    } catch (error) {
+      console.error('Error generating test:', error);
+    }
+  }, [selectedLanguage, testDuration]);
+
+  const startTest = () => {
+    if (!state.currentText) {
+      generateTestText();
+    }
     
-    if (newSettings.testDuration) {
-      setTestDuration(newSettings.testDuration);
+    setState(prev => ({
+      ...prev,
+      isActive: true,
+      startTime: new Date(),
+      userInput: '',
+      currentIndex: 0,
+      errors: 0,
+      wpm: 0,
+      accuracy: 0
+    }));
+    setTimeRemaining(testDuration);
+    setIsCompleted(false);
+    setTestResults(null);
+    
+    // Focus the input field
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+        inputRef.current.setSelectionRange(0, 0);
+      }
+    }, 100);
+  };
+
+  const stopTest = () => {
+    setState(prev => ({ ...prev, isActive: false }));
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
     }
   };
 
-  const handleReady = () => {
-    setShowStartModal(true);
-    setCurrentView('modal');
+  const resetTest = () => {
+    setState(prev => ({
+      ...prev,
+      isActive: false,
+      userInput: '',
+      currentIndex: 0,
+      errors: 0,
+      wpm: 0,
+      accuracy: 0
+    }));
+    setTimeRemaining(testDuration);
+    setIsCompleted(false);
+    setTestResults(null);
+    setPerformances([]);
   };
 
-  const handleStartPractice = () => {
-    setCurrentView('practice');
-    handleTestStart();
+  const handleTestComplete = async () => {
+    if (!state.startTime) return;
+
+    const endTime = new Date();
+    const duration = (endTime.getTime() - state.startTime.getTime()) / 1000;
+    const wordsTyped = state.userInput.trim().split(/\s+/).length;
+    const wpm = Math.round((wordsTyped / duration) * 60);
+    const accuracy = state.currentText.length > 0 
+      ? Math.round(((state.currentText.length - state.errors) / state.currentText.length) * 100)
+      : 0;
+
+    const results = {
+      wpm,
+      accuracy,
+      errors: state.errors,
+      duration: Math.round(duration),
+      language: selectedLanguage
+    };
+
+    setTestResults(results);
+    setState(prev => ({ ...prev, isActive: false, wpm, accuracy }));
+    setIsCompleted(true);
+
+    // Save session results
+    try {
+      const sessionResult: SessionResult = {
+        id: Date.now().toString(),
+        date: new Date(),
+        language: selectedLanguage,
+        duration: Math.round(duration),
+        wpm,
+        accuracy,
+        keywordPerformance: [] // We'll implement proper keyword performance tracking later
+      };
+
+      saveSessionResults(sessionResult, performances);
+    } catch (error) {
+      console.error('Error saving session results:', error);
+    }
   };
 
-  const handleBackToSetup = () => {
-    setCurrentView('setup');
-    setShowStartModal(false);
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (!state.isActive) return;
+
+    const input = e.target.value;
+    const targetText = state.currentText;
+    let newIndex = 0;
+    let errors = 0;
+
+    // Calculate current position and errors
+    for (let i = 0; i < input.length; i++) {
+      if (i < targetText.length) {
+        if (input[i] === targetText[i]) {
+          newIndex = i + 1;
+        } else {
+          errors++;
+        }
+      } else {
+        errors++;
+      }
+    }
+
+    // Calculate WPM and accuracy
+    const currentTime = new Date();
+    const elapsed = state.startTime ? (currentTime.getTime() - state.startTime.getTime()) / 1000 : 0;
+    const wordsTyped = input.trim().split(/\s+/).length;
+    const wpm = elapsed > 0 ? Math.round((wordsTyped / elapsed) * 60) : 0;
+    const accuracy = targetText.length > 0 
+      ? Math.round(((targetText.length - errors) / targetText.length) * 100)
+      : 0;
+
+    setState(prev => ({
+      ...prev,
+      userInput: input,
+      currentIndex: newIndex,
+      errors,
+      wpm,
+      accuracy
+    }));
+
+    // Track keyword performance
+    if (input.length > 0) {
+      const performance: Performance = {
+        keyword: targetText[newIndex - 1] || '',
+        correct: input[input.length - 1] === targetText[input.length - 1],
+        speed: elapsed > 0 ? (input.length / elapsed) * 1000 : 0,
+        timestamp: currentTime
+      };
+      
+      setPerformances(prev => [...prev, performance]);
+    }
   };
 
-  const handleBackToHome = () => {
-    setCurrentView('setup');
-    setShowStartModal(false);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Escape') {
+      stopTest();
+    }
   };
 
-  // Setup Section
-  if (currentView === 'setup') {
-    return (
-      <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
-        {/* Header */}
-        <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-800 dark:bg-black/80">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-black dark:text-white">Cyper</h1>
-                <p className="text-gray-600 dark:text-gray-400">Programmer Typing Practice</p>
-              </div>
-              <div className="flex gap-4">
-                <Link href="/">
-                  <Button 
-                    variant="outline" 
-                    className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Home
-                  </Button>
-                </Link>
-                <Link href="/stats">
-                  <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
-                    View Stats
-                  </Button>
-                </Link>
-                <ThemeToggle />
-              </div>
-            </div>
-          </div>
-        </header>
+  const renderTextWithHighlighting = () => {
+    const targetText = state.currentText;
+    const userInput = state.userInput;
+    
+    return targetText.split('').map((char, index) => {
+      let className = 'text-gray-500'; // Default: not yet typed
+      let displayChar = char; // Default: show target character
+      
+      if (index < userInput.length) {
+        if (char === userInput[index]) {
+          className = 'text-emerald-400 '; // Correct
+          displayChar = char; // Show correct character
+        } else {
+          className = 'text-rose-500'; // Incorrect
+          displayChar = userInput[index]; // Show the wrong character you typed
+        }
+      } else if (index === userInput.length) {
+        className = 'text-yellow-300 bg-yellow-100 dark:bg-yellow-900 font-bold'; // Current character
+        displayChar = char; // Show target character
+      }
+      
+      return (
+        <span 
+          key={index} 
+          className={className}
+          style={{
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '18px',
+            lineHeight: '1.6',
+            display: 'inline',
+            margin: '0',
+            padding: '0',
+            letterSpacing: '0px',
+            textIndent: '0px',
+            textAlign: 'left'
+          }}
+        >
+          {displayChar}
+        </span>
+      );
+    });
+  };
 
-        {/* Setup Content */}
-        <main className="container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-black dark:text-white mb-4">Practice Setup</h1>
-              <p className="text-gray-600 dark:text-gray-400">Configure your practice session and see what you'll be working on</p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Configuration */}
-              <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
-                <h3 className="text-xl font-semibold text-black dark:text-white mb-6 flex items-center">
-                  <Target className="mr-2 h-5 w-5" />
-                  Test Configuration
-                </h3>
-                
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Programming Language
-                    </label>
-                    <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                      <SelectTrigger className="bg-white border-gray-300 text-black dark:bg-black dark:border-gray-700 dark:text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-gray-200 dark:bg-black dark:border-gray-800">
-                        {languages.map(lang => (
-                          <SelectItem key={lang.id} value={lang.id} className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">
-                            {lang.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Test Duration
-                    </label>
-                    <Select value={testDuration.toString()} onValueChange={(value) => setTestDuration(parseInt(value))}>
-                      <SelectTrigger className="bg-white border-gray-300 text-black dark:bg-black dark:border-gray-700 dark:text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-gray-200 dark:bg-black dark:border-gray-800">
-                        <SelectItem value="30" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">30 seconds</SelectItem>
-                        <SelectItem value="60" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">1 minute</SelectItem>
-                        <SelectItem value="120" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">2 minutes</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quick Stats</h4>
-                    <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                      <div>Language: {languages.find(l => l.id === selectedLanguage)?.name}</div>
-                      <div>Duration: {testDuration}s</div>
-                      <div>Mode: Adaptive Practice</div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* What You'll Practice */}
-              <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
-                <h3 className="text-xl font-semibold text-black dark:text-white mb-6 flex items-center">
-                  <Code className="mr-2 h-5 w-5" />
-                  What You'll Practice
-                </h3>
-                
-                <div className="space-y-4">
-                  <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                    <h4 className="font-medium text-black dark:text-white mb-2">Keywords & Syntax</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Practice typing programming keywords, operators, and syntax specific to {languages.find(l => l.id === selectedLanguage)?.name}.
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                    <h4 className="font-medium text-black dark:text-white mb-2">Real Code Patterns</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Type realistic code snippets that you'd actually write in your projects.
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                    <h4 className="font-medium text-black dark:text-white mb-2">Adaptive Focus</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Our algorithm will focus on keywords you struggle with to maximize improvement.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <Button 
-                    onClick={handleReady}
-                    size="lg" 
-                    className="w-full bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
-                  >
-                    Ready?
-                    <Play className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Algorithm Info */}
-              <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
-                <h3 className="text-xl font-semibold text-black dark:text-white mb-6 flex items-center">
-                  <Brain className="mr-2 h-5 w-5" />
-                  How It Works
-                </h3>
-                
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="bg-blue-100 dark:bg-blue-900 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-blue-600 dark:text-blue-400">1</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-black dark:text-white text-sm">Spaced Repetition</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Keywords you've struggled with are scheduled for review</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-3">
-                    <div className="bg-green-100 dark:bg-green-900 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-green-600 dark:text-green-400">2</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-black dark:text-white text-sm">Frequency Analysis</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Recent weak areas get more practice time</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-3">
-                    <div className="bg-purple-100 dark:bg-purple-900 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-purple-600 dark:text-purple-400">3</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-black dark:text-white text-sm">Real Code Generation</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Practice with realistic programming patterns</p>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Session Type:</span>
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        Adaptive
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between text-sm mt-2">
-                      <span className="text-gray-600 dark:text-gray-400">Focus:</span>
-                      <span className="text-black dark:text-white">Weak Keywords</span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  // Start Modal
-  if (currentView === 'modal') {
-    return (
-      <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
-        {/* Header */}
-        <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-800 dark:bg-black/80">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-black dark:text-white">Cyper</h1>
-                <p className="text-gray-600 dark:text-gray-400">Programmer Typing Practice</p>
-              </div>
-              <ThemeToggle />
-            </div>
-          </div>
-        </header>
-
-        {/* Modal Content */}
-        <main className="container mx-auto px-4 py-16">
-          <div className="max-w-md mx-auto">
-            <Card className="p-8 bg-white border-gray-200 shadow-lg dark:bg-black dark:border-gray-800">
-              <div className="text-center">
-                <div className="bg-green-100 dark:bg-green-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
-                  <Play className="h-8 w-8 text-green-600 dark:text-green-400" />
-                </div>
-                
-                <h2 className="text-2xl font-bold text-black dark:text-white mb-4">Ready to Start?</h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  You're about to start a {testDuration}-second practice session in {languages.find(l => l.id === selectedLanguage)?.name}.
-                </p>
-                
-                <div className="space-y-3 mb-8">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Language:</span>
-                    <span className="text-black dark:text-white">{languages.find(l => l.id === selectedLanguage)?.name}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                    <span className="text-black dark:text-white">{testDuration} seconds</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">Mode:</span>
-                    <span className="text-black dark:text-white">Adaptive Practice</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button 
-                    variant="outline" 
-                    onClick={handleBackToSetup}
-                    className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                  >
-                    <X className="mr-2 h-4 w-4" />
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={handleStartPractice}
-                    className="flex-1 bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
-                  >
-                    <Play className="mr-2 h-4 w-4" />
-                    Start
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  // Practice Section
-  if (currentView === 'practice') {
-    return (
-      <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
-        {/* Header */}
-        <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm dark:border-gray-800 dark:bg-black/80">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-black dark:text-white">Cyper</h1>
-                <p className="text-gray-600 dark:text-gray-400">Programmer Typing Practice</p>
-              </div>
-              <div className="flex gap-4">
+  return (
+    <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white flex flex-col">
+      {/* Compact Header with Stats */}
+      <header className="border-b border-gray-200 bg-white/95 backdrop-blur-sm dark:border-gray-700 dark:bg-black sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex justify-between items-center">
+            {/* Left side - Navigation */}
+            <div className="flex items-center gap-4">
+              <Link href="/">
                 <Button 
                   variant="outline" 
-                  onClick={handleBackToHome}
+                  size="sm"
                   className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
                 >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Setup
+                  <ArrowLeft className="mr-1 h-3 w-3" />
+                  Home
                 </Button>
-                <Link href="/stats">
-                  <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
-                    View Stats
-                  </Button>
-                </Link>
-                <ThemeToggle />
+              </Link>
+              <Link href="/stats">
+                <Button variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
+                  Stats
+                </Button>
+              </Link>
+              <ThemeToggle />
+            </div>
+
+            {/* Center - Test Controls */}
+            <div className="flex items-center gap-3">
+              <div className="flex gap-2">
+                <Button
+                  onClick={startTest}
+                  disabled={state.isActive}
+                  size="sm"
+                  className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                >
+                  <Play className="mr-1 h-3 w-3" />
+                  {state.isActive ? 'Running...' : 'Start'}
+                </Button>
+                <Button
+                  onClick={stopTest}
+                  disabled={!state.isActive}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  <Square className="h-3 w-3" />
+                </Button>
+                <Button
+                  onClick={resetTest}
+                  disabled={state.isActive}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                </Button>
+              </div>
+              
+              {/* Language and Duration Selectors */}
+              <div className="flex gap-2">
+                <select 
+                  value={selectedLanguage} 
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="text-xs p-1 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-black text-black dark:text-white"
+                >
+                  {languages.map(lang => (
+                    <option key={lang.id} value={lang.id}>{lang.name}</option>
+                  ))}
+                </select>
+                <select 
+                  value={testDuration} 
+                  onChange={(e) => setTestDuration(parseInt(e.target.value))}
+                  className="text-xs p-1 border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-black text-black dark:text-white"
+                >
+                  <option value="30">30s</option>
+                  <option value="60">1m</option>
+                  <option value="120">2m</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Right side - Stats Boxes */}
+            <div className="flex gap-3">
+              {/* WPM Box */}
+              <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-lg text-center min-w-[60px]">
+                <div className="text-lg font-bold text-black dark:text-white">{state.wpm}</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">WPM</div>
+              </div>
+              
+              {/* Accuracy Box */}
+              <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-lg text-center min-w-[60px]">
+                <div className="text-lg font-bold text-black dark:text-white">{state.accuracy}%</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">Accuracy</div>
+              </div>
+              
+              {/* Errors Box */}
+              <div className="bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded-lg text-center min-w-[60px]">
+                <div className="text-lg font-bold text-black dark:text-white">{state.errors}</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">Errors</div>
+              </div>
+              
+              {/* Time Box */}
+              <div className={`px-3 py-2 rounded-lg text-center min-w-[60px] ${
+                timeRemaining <= 10 ? 'bg-red-100 dark:bg-red-900' : 'bg-gray-100 dark:bg-gray-800'
+              }`}>
+                <div className={`text-lg font-bold ${
+                  timeRemaining <= 10 ? 'text-red-600 dark:text-red-400' : 'text-black dark:text-white'
+                }`}>
+                  {timeRemaining}s
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">Time</div>
               </div>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Practice Content */}
-        <main className="container mx-auto px-4 py-8">
-          {isTestActive ? (
-            <TypingTest
-              language={selectedLanguage}
-              duration={testDuration}
-              onTestComplete={handleTestComplete}
-              onTestStart={handleTestStart}
-              onTestStop={handleTestStop}
-            />
-          ) : (
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-black dark:text-white mb-4">Practice Session</h1>
-              <p className="text-gray-600 dark:text-gray-400 mb-8">
-                {languages.find(l => l.id === selectedLanguage)?.name} • {testDuration} seconds
-              </p>
-              <Button 
-                onClick={handleStartPractice}
-                size="lg" 
-                className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 px-8 py-3 text-lg"
-              >
-                Start Practice
-                <Play className="ml-2 h-5 w-5" />
-              </Button>
+      {/* Full Page Typing Interface */}
+      <main className="flex-1 flex flex-col">
+        {/* Test Results Banner */}
+        {testResults && (
+          <div className="bg-green-50 dark:bg-black border-b border-green-200 dark:border-green-700 px-4 py-3">
+            <div className="container mx-auto">
+              <div className="flex items-center justify-center gap-6 text-sm font-bold">
+                <div className="flex items-center gap-2">
+                  <span className="text-green-700 dark:text-green-300">Test Completed!</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-green-700 dark:text-green-300">WPM:</span>
+                  <span className="font-bold text-green-800 dark:text-white">{testResults.wpm}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-green-700 dark:text-green-300">Accuracy:</span>
+                  <span className="font-bold text-green-800 dark:text-white">{testResults.accuracy}%</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-green-700 dark:text-green-300">Errors:</span>
+                  <span className="font-bold text-green-800 dark:text-white">{testResults.errors}</span>
+                </div>
+              </div>
             </div>
-          )}
-        </main>
-      </div>
-    );
-  }
+          </div>
+        )}
 
-  return null;
+        {/* Full Screen Text Area */}
+        <div className="flex-1 relative">
+          {/* Text Display with Overlay */}
+          <div className="absolute inset-0 bg-gray-50 dark:bg-black">
+            <div 
+              className="h-full overflow-y-auto"
+              style={{ 
+                padding: '24px',
+                margin: '0',
+                boxSizing: 'border-box'
+              }}
+            >
+              <div 
+                className="font-mono whitespace-pre-wrap"
+                style={{ 
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontSize: '18px',
+                  lineHeight: '1.6',
+                  padding: '0px',
+                  margin: '0',
+                  letterSpacing: '0px',
+                  textIndent: '0px',
+                  textAlign: 'left',
+                  wordWrap: 'normal',
+                  whiteSpace: 'pre-wrap'
+                }}
+              >
+                {renderTextWithHighlighting()}
+              </div>
+            </div>
+          </div>
+          
+          {/* Overlay Input Field */}
+          <div className="absolute inset-0">
+            <textarea
+              ref={inputRef}
+              value={state.userInput}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder={state.isActive ? "Start typing..." : "Click 'Start' to begin"}
+              disabled={!state.isActive}
+              className="w-full h-full border-0 resize-none focus:outline-none bg-transparent caret-yellow-500 whitespace-pre-wrap text-transparent"
+              style={{ 
+                fontFamily: 'JetBrains Mono, monospace',
+                background: 'transparent',
+                caretColor: '#eab308',
+                fontSize: '18px',
+                lineHeight: '1.6',
+                padding: '24px',
+                margin: '0',
+                boxSizing: 'border-box',
+                letterSpacing: '0px',
+                textIndent: '0px',
+                textAlign: 'left',
+                border: 'none',
+                outline: 'none',
+                resize: 'none',
+                overflow: 'hidden',
+                wordWrap: 'normal',
+                whiteSpace: 'pre-wrap'
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Instructions Footer */}
+        <div className="bg-gray-100 dark:bg-black border-t border-gray-200 dark:border-gray-700 px-4 py-2">
+          <div className="container mx-auto">
+            <div className="flex items-center justify-center gap-6 text-xs text-gray-600 dark:text-gray-400">
+              <span>• Press <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">Esc</kbd> to stop</span>
+              <span>• Focus on accuracy first, then speed</span>
+              <span>• Test auto-ends when time runs out</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 }

@@ -19,6 +19,16 @@ export default function Home() {
               <p className="text-gray-600 dark:text-gray-400">Programmer Typing Practice</p>
             </div>
             <div className="flex gap-4">
+              <Link href="/practice">
+                <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
+                  Practice
+                </Button>
+              </Link>
+              <Link href="/test-case">
+                <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
+                  Test Cases
+                </Button>
+              </Link>
               <Link href="/stats">
                 <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
                   View Stats

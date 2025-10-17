@@ -273,19 +273,19 @@ export default function TestCasePage() {
     const userInput = state.userInput;
     
     return targetText.split('').map((char, index) => {
-      let className = 'text-gray-400'; // Default: not yet typed
+      let className = 'text-gray-600'; // Default: not yet typed
       let displayChar = char; // Default: show target character
       
       if (index < userInput.length) {
         if (char === userInput[index]) {
-          className = 'text-green-600 dark:text-green-400'; // Correct
+          className = 'text-green-400 '; // Correct
           displayChar = char; // Show correct character
         } else {
-          className = 'text-red-600 dark:text-red-700'; // Incorrect
+          className = 'text-blue-700'; // Incorrect
           displayChar = userInput[index]; // Show the wrong character you typed
         }
       } else if (index === userInput.length) {
-        className = 'text-yellow-600 dark:text-yellow-700'; // Current character
+        className = 'text-yellow-300 font-bold'; // Current character
         displayChar = char; // Show target character
       }
       

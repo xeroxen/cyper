@@ -274,15 +274,19 @@ export default function TestCasePage() {
     
     return targetText.split('').map((char, index) => {
       let className = 'text-gray-400'; // Default: not yet typed
+      let displayChar = char; // Default: show target character
       
       if (index < userInput.length) {
         if (char === userInput[index]) {
-          className = 'text-green-500 bg-green-100 dark:bg-green-900'; // Correct
+          className = 'text-green-600 dark:text-green-400'; // Correct
+          displayChar = char; // Show correct character
         } else {
-          className = 'text-red-500 bg-red-100 dark:bg-red-900'; // Incorrect
+          className = 'text-red-600 dark:text-red-700'; // Incorrect
+          displayChar = userInput[index]; // Show the wrong character you typed
         }
       } else if (index === userInput.length) {
-        className = 'text-yellow-500 bg-yellow-100 dark:bg-yellow-900'; // Current character
+        className = 'text-yellow-600 dark:text-yellow-700'; // Current character
+        displayChar = char; // Show target character
       }
       
       return (
@@ -301,7 +305,7 @@ export default function TestCasePage() {
             textAlign: 'left'
           }}
         >
-          {char}
+          {displayChar}
         </span>
       );
     });
@@ -492,7 +496,7 @@ export default function TestCasePage() {
               onKeyDown={handleKeyDown}
               placeholder={state.isActive ? "Start typing..." : "Click 'Start' to begin"}
               disabled={!state.isActive}
-              className="w-full h-full border-0 resize-none focus:outline-none bg-transparent caret-yellow-500 whitespace-pre-wrap text-gray-600 dark:text-gray-400"
+              className="w-full h-full border-0 resize-none focus:outline-none bg-transparent caret-yellow-500 whitespace-pre-wrap text-gray-500 dark:text-gray-500"
               style={{ 
                 fontFamily: 'JetBrains Mono, monospace',
                 background: 'transparent',

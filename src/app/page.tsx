@@ -1,59 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { TypingTest } from '@/components/typing/TypingTest';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { languages } from '@/lib/languages';
-import { loadUserSettings, saveUserSettings } from '@/lib/storage/localStorage';
-import { UserSettings } from '@/types';
 import Link from 'next/link';
+import { ArrowRight, Target, Brain, BarChart3, Code, Clock, Zap } from 'lucide-react';
 
 export default function Home() {
-  const [selectedLanguage, setSelectedLanguage] = useState('javascript');
-  const [testDuration, setTestDuration] = useState(60);
-  const [isTestActive, setIsTestActive] = useState(false);
-  const [testResults, setTestResults] = useState<any>(null);
-  const [settings, setSettings] = useState<UserSettings>({
-    soundEnabled: true,
-    fontSize: 'medium',
-    testDuration: 60,
-    theme: 'light'
-  });
-
-  useEffect(() => {
-    const savedSettings = loadUserSettings();
-    setSettings(savedSettings);
-    setTestDuration(savedSettings.testDuration);
-  }, []);
-
-  const handleTestStart = () => {
-    setIsTestActive(true);
-  };
-
-  const handleTestStop = () => {
-    setIsTestActive(false);
-  };
-
-  const handleTestComplete = (results: any) => {
-    setIsTestActive(false);
-    setTestResults(results);
-  };
-
-  const handleSettingsChange = (newSettings: Partial<UserSettings>) => {
-    const updatedSettings = { ...settings, ...newSettings };
-    setSettings(updatedSettings);
-    saveUserSettings(updatedSettings);
-    
-    if (newSettings.testDuration) {
-      setTestDuration(newSettings.testDuration);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
       {/* Header */}
@@ -76,196 +30,116 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="practice" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-gray-100 border-gray-200 dark:bg-gray-900 dark:border-gray-800">
-            <TabsTrigger value="practice" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">
-              Practice
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">
-              Settings
-            </TabsTrigger>
-            <TabsTrigger value="about" className="data-[state=active]:bg-black data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-black">
-              About
-            </TabsTrigger>
-          </TabsList>
+      {/* Hero Section */}
+      <main className="container mx-auto px-4 py-16">
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold text-black dark:text-white mb-6">
+            Master Programming Typing
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
+            A specialized typing practice app designed for programmers. Improve your speed and accuracy with programming languages, syntax, and real code patterns.
+          </p>
+          <Link href="/practice">
+            <Button 
+              size="lg" 
+              className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200 px-8 py-3 text-lg"
+            >
+              Get Started
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
+        </div>
 
-          <TabsContent value="practice" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Controls Sidebar */}
-              <div className="lg:col-span-1">
-                <Card className="p-4 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
-                  <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">Test Configuration</h3>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Programming Language
-                      </label>
-                      <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                        <SelectTrigger className="bg-white border-gray-300 text-black dark:bg-black dark:border-gray-700 dark:text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-gray-200 dark:bg-black dark:border-gray-800">
-                          {languages.map(lang => (
-                            <SelectItem key={lang.id} value={lang.id} className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">
-                              {lang.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Test Duration
-                      </label>
-                      <Select value={testDuration.toString()} onValueChange={(value) => setTestDuration(parseInt(value))}>
-                        <SelectTrigger className="bg-white border-gray-300 text-black dark:bg-black dark:border-gray-700 dark:text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-gray-200 dark:bg-black dark:border-gray-800">
-                          <SelectItem value="30" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">30 seconds</SelectItem>
-                          <SelectItem value="60" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">1 minute</SelectItem>
-                          <SelectItem value="120" className="text-black hover:bg-gray-50 dark:text-white dark:hover:bg-gray-900">2 minutes</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-                      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quick Stats</h4>
-                      <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                        <div>Language: {languages.find(l => l.id === selectedLanguage)?.name}</div>
-                        <div>Duration: {testDuration}s</div>
-                        <div>Mode: Adaptive Practice</div>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-
-              {/* Main Test Area */}
-              <div className="lg:col-span-3">
-                {testResults && (
-                  <Card className="p-4 mb-6 bg-green-50 border-green-200">
-                    <h3 className="text-lg font-semibold text-green-800 mb-2">Test Completed!</h3>
-                    <div className="flex gap-4">
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                        WPM: {testResults.wpm}
-                      </Badge>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                        Accuracy: {testResults.accuracy}%
-                      </Badge>
-                    </div>
-                  </Card>
-                )}
-
-                <TypingTest
-                  language={selectedLanguage}
-                  duration={testDuration}
-                  onTestStart={handleTestStart}
-                  onTestStop={handleTestStop}
-                  onTestComplete={handleTestComplete}
-                />
-              </div>
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
+            <div className="flex items-center mb-4">
+              <Target className="h-8 w-8 text-blue-600 dark:text-blue-400 mr-3" />
+              <h3 className="text-xl font-semibold text-black dark:text-white">Adaptive Learning</h3>
             </div>
-          </TabsContent>
+            <p className="text-gray-600 dark:text-gray-400">
+              Our algorithm identifies your weak keywords and creates personalized practice sessions to improve them faster.
+            </p>
+          </Card>
 
-          <TabsContent value="settings" className="mt-6">
-            <Card className="p-6 bg-white border-gray-200 shadow-sm">
-              <h3 className="text-xl font-semibold mb-4 text-black">Settings</h3>
-              
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Font Size
-                  </label>
-                  <Select 
-                    value={settings.fontSize} 
-                    onValueChange={(value: 'small' | 'medium' | 'large') => 
-                      handleSettingsChange({ fontSize: value })
-                    }
-                  >
-                    <SelectTrigger className="bg-white border-gray-300 text-black">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
-                      <SelectItem value="small" className="text-black hover:bg-gray-50">Small</SelectItem>
-                      <SelectItem value="medium" className="text-black hover:bg-gray-50">Medium</SelectItem>
-                      <SelectItem value="large" className="text-black hover:bg-gray-50">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+          <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
+            <div className="flex items-center mb-4">
+              <Brain className="h-8 w-8 text-green-600 dark:text-green-400 mr-3" />
+              <h3 className="text-xl font-semibold text-black dark:text-white">Spaced Repetition</h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Uses proven spaced repetition techniques to help you retain programming syntax and keywords long-term.
+            </p>
+          </Card>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Default Test Duration
-                  </label>
-                  <Select 
-                    value={settings.testDuration.toString()} 
-                    onValueChange={(value) => 
-                      handleSettingsChange({ testDuration: parseInt(value) as 30 | 60 | 120 })
-                    }
-                  >
-                    <SelectTrigger className="bg-white border-gray-300 text-black">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
-                      <SelectItem value="30" className="text-black hover:bg-gray-50">30 seconds</SelectItem>
-                      <SelectItem value="60" className="text-black hover:bg-gray-50">1 minute</SelectItem>
-                      <SelectItem value="120" className="text-black hover:bg-gray-50">2 minutes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+          <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
+            <div className="flex items-center mb-4">
+              <Code className="h-8 w-8 text-purple-600 dark:text-purple-400 mr-3" />
+              <h3 className="text-xl font-semibold text-black dark:text-white">Real Code Patterns</h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Practice with realistic code snippets instead of random text. Learn to type actual programming constructs.
+            </p>
+          </Card>
 
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="soundEnabled"
-                    checked={settings.soundEnabled}
-                    onChange={(e) => handleSettingsChange({ soundEnabled: e.target.checked })}
-                    className="rounded border-gray-300 bg-white text-black"
-                  />
-                  <label htmlFor="soundEnabled" className="text-sm font-medium text-gray-700">
-                    Enable sound effects
-                  </label>
-                </div>
+          <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
+            <div className="flex items-center mb-4">
+              <BarChart3 className="h-8 w-8 text-orange-600 dark:text-orange-400 mr-3" />
+              <h3 className="text-xl font-semibold text-black dark:text-white">Progress Tracking</h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Detailed analytics show your improvement over time, keyword mastery levels, and areas that need attention.
+            </p>
+          </Card>
+
+          <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
+            <div className="flex items-center mb-4">
+              <Zap className="h-8 w-8 text-yellow-600 dark:text-yellow-400 mr-3" />
+              <h3 className="text-xl font-semibold text-black dark:text-white">Multiple Languages</h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Support for JavaScript, TypeScript, Python, C, and more. Each language has its own keyword set and patterns.
+            </p>
+          </Card>
+
+          <Card className="p-6 bg-white border-gray-200 shadow-sm dark:bg-black dark:border-gray-800">
+            <div className="flex items-center mb-4">
+              <Clock className="h-8 w-8 text-red-600 dark:text-red-400 mr-3" />
+              <h3 className="text-xl font-semibold text-black dark:text-white">Flexible Sessions</h3>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Practice for 30 seconds, 1 minute, or 2 minutes. Perfect for quick breaks or focused practice sessions.
+            </p>
+          </Card>
+        </div>
+
+        {/* How It Works */}
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-black dark:text-white mb-8">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="bg-blue-100 dark:bg-blue-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">1</span>
               </div>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="about" className="mt-6">
-            <Card className="p-6 bg-white border-gray-200 shadow-sm">
-              <h3 className="text-xl font-semibold mb-4 text-black">About Cyper</h3>
-              
-              <div className="space-y-4 text-gray-700">
-                <p>
-                  Cyper is a specialized typing practice application designed specifically for programmers. 
-                  Unlike general typing practice apps, Cyper focuses on programming languages, syntax, 
-                  and common coding patterns.
-                </p>
-                
-                <h4 className="text-lg font-semibold text-black">Key Features:</h4>
-                <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li>Adaptive learning algorithm that focuses on your weak keywords</li>
-                  <li>Spaced repetition system for long-term retention</li>
-                  <li>Support for JavaScript, TypeScript, Python, and C</li>
-                  <li>Real-time performance tracking and analytics</li>
-                  <li>Weekly comprehensive review sessions</li>
-                  <li>Realistic code snippet generation</li>
-                </ul>
-
-                <h4 className="text-lg font-semibold text-black">How it works:</h4>
-                <p>
-                  The app tracks your performance on individual keywords and programming concepts. 
-                  It uses a hybrid algorithm combining frequency-based practice (showing weak keywords more often) 
-                  with spaced repetition (scheduling reviews based on forgetting curves) to optimize your learning.
-                </p>
+              <h3 className="text-xl font-semibold text-black dark:text-white mb-2">Choose Your Language</h3>
+              <p className="text-gray-600 dark:text-gray-400">Select from JavaScript, TypeScript, Python, C, or other programming languages.</p>
+            </div>
+            <div className="text-center">
+              <div className="bg-green-100 dark:bg-green-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-green-600 dark:text-green-400">2</span>
               </div>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              <h3 className="text-xl font-semibold text-black dark:text-white mb-2">Practice & Learn</h3>
+              <p className="text-gray-600 dark:text-gray-400">Type realistic code snippets while our algorithm tracks your performance.</p>
+            </div>
+            <div className="text-center">
+              <div className="bg-purple-100 dark:bg-purple-900 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">3</span>
+              </div>
+              <h3 className="text-xl font-semibold text-black dark:text-white mb-2">Improve Continuously</h3>
+              <p className="text-gray-600 dark:text-gray-400">Get personalized practice sessions based on your weak areas and progress.</p>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );

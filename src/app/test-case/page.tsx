@@ -273,19 +273,19 @@ export default function TestCasePage() {
     const userInput = state.userInput;
     
     return targetText.split('').map((char, index) => {
-      let className = 'text-gray-600'; // Default: not yet typed
+      let className = 'text-gray-500'; // Default: not yet typed
       let displayChar = char; // Default: show target character
       
       if (index < userInput.length) {
         if (char === userInput[index]) {
-          className = 'text-green-400 '; // Correct
+          className = 'text-emerald-400 '; // Correct
           displayChar = char; // Show correct character
         } else {
-          className = 'text-blue-700'; // Incorrect
+          className = 'text-rose-500'; // Incorrect
           displayChar = userInput[index]; // Show the wrong character you typed
         }
       } else if (index === userInput.length) {
-        className = 'text-yellow-300 font-bold'; // Current character
+        className = 'text-yellow-300 bg-yellow-100 dark:bg-yellow-900 font-bold'; // Current character
         displayChar = char; // Show target character
       }
       
@@ -314,7 +314,7 @@ export default function TestCasePage() {
   return (
     <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white flex flex-col">
       {/* Compact Header with Stats */}
-      <header className="border-b border-gray-200 bg-white/95 backdrop-blur-sm dark:border-gray-800 dark:bg-black/95 sticky top-0 z-10">
+      <header className="border-b border-gray-200 bg-white/95 backdrop-blur-sm dark:border-gray-700 dark:bg-black sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
             {/* Left side - Navigation */}
@@ -432,23 +432,23 @@ export default function TestCasePage() {
       <main className="flex-1 flex flex-col">
         {/* Test Results Banner */}
         {testResults && (
-          <div className="bg-green-50 dark:bg-green-900 border-b border-green-200 dark:border-green-800 px-4 py-3">
+          <div className="bg-green-50 dark:bg-black border-b border-green-200 dark:border-green-700 px-4 py-3">
             <div className="container mx-auto">
-              <div className="flex items-center justify-center gap-6 text-sm">
+              <div className="flex items-center justify-center gap-6 text-sm font-bold">
                 <div className="flex items-center gap-2">
                   <span className="text-green-700 dark:text-green-300">Test Completed!</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-green-700 dark:text-green-300">WPM:</span>
-                  <span className="font-bold text-green-800 dark:text-green-200">{testResults.wpm}</span>
+                  <span className="font-bold text-green-800 dark:text-white">{testResults.wpm}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-green-700 dark:text-green-300">Accuracy:</span>
-                  <span className="font-bold text-green-800 dark:text-green-200">{testResults.accuracy}%</span>
+                  <span className="font-bold text-green-800 dark:text-white">{testResults.accuracy}%</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-green-700 dark:text-green-300">Errors:</span>
-                  <span className="font-bold text-green-800 dark:text-green-200">{testResults.errors}</span>
+                  <span className="font-bold text-green-800 dark:text-white">{testResults.errors}</span>
                 </div>
               </div>
             </div>
@@ -458,7 +458,7 @@ export default function TestCasePage() {
         {/* Full Screen Text Area */}
         <div className="flex-1 relative">
           {/* Text Display with Overlay */}
-          <div className="absolute inset-0 bg-gray-50 dark:bg-gray-900">
+          <div className="absolute inset-0 bg-gray-50 dark:bg-black">
             <div 
               className="h-full overflow-y-auto"
               style={{ 
@@ -496,7 +496,7 @@ export default function TestCasePage() {
               onKeyDown={handleKeyDown}
               placeholder={state.isActive ? "Start typing..." : "Click 'Start' to begin"}
               disabled={!state.isActive}
-              className="w-full h-full border-0 resize-none focus:outline-none bg-transparent caret-yellow-500 whitespace-pre-wrap text-gray-500 dark:text-gray-500"
+              className="w-full h-full border-0 resize-none focus:outline-none bg-transparent caret-yellow-500 whitespace-pre-wrap text-transparent"
               style={{ 
                 fontFamily: 'JetBrains Mono, monospace',
                 background: 'transparent',
@@ -521,7 +521,7 @@ export default function TestCasePage() {
         </div>
 
         {/* Instructions Footer */}
-        <div className="bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2">
+        <div className="bg-gray-100 dark:bg-black border-t border-gray-200 dark:border-gray-700 px-4 py-2">
           <div className="container mx-auto">
             <div className="flex items-center justify-center gap-6 text-xs text-gray-600 dark:text-gray-400">
               <span>• Press <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">Esc</kbd> to stop</span>
